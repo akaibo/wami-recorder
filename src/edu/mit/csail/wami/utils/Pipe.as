@@ -54,10 +54,15 @@ package edu.mit.csail.wami.utils
 				sink.write(bytes);
 			}
 		}
+		public function getRecording():ByteArray {
+      if (sink) {
+        return sink.getRecording();
+      }
+      return null;
+    }
 		
 		public function setSink(pipe:Pipe):Pipe 
 		{
-    External.debug("Set Sink");
 			sink = pipe;
 			return sink;
 		}

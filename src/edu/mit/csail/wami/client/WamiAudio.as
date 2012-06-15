@@ -31,13 +31,15 @@ package edu.mit.csail.wami.client
 	import edu.mit.csail.wami.record.IRecorder;
 	import edu.mit.csail.wami.record.WamiRecorder;
 	import edu.mit.csail.wami.utils.External;
+  import com.hurlant.util.Base64;
 	
 	import flash.display.MovieClip;
+  import flash.utils.ByteArray;
 
 	public class WamiAudio extends MovieClip
 	{
-		private var recorder:IRecorder;
-		private var player:IPlayer;
+		private var recorder:WamiRecorder;
+		private var player:WamiPlayer;
 		
 		private var checkSettingsIntervalID:int = 0;
 		private var checkSettingsInterval:int = 1000;
@@ -47,63 +49,58 @@ package edu.mit.csail.wami.client
 			recorder = new WamiRecorder(params.getMicrophone(), params);
 			player = new WamiPlayer();
 			
-			External.addCallback("startListening", startListening);
-			External.addCallback("stopListening", stopListening);
 			External.addCallback("startRecording", startRecording);
 			External.addCallback("stopRecording",stopRecording);
 			External.addCallback("getRecordingLevel", getRecordingLevel);
+			External.addCallback("getRecordingB64", getRecordingB64);
+
+			External.addCallback("startListening", startListening);
+			External.addCallback("stopListening", stopListening);
 			
-			External.addCallback("startPlaying",startPlaying);
-			External.addCallback("stopPlaying",stopPlaying);
+			External.addCallback("startPreview",startPreview);
+			External.addCallback("stopPreview", stopPreview);
 			External.addCallback("getPlayingLevel", getPlayingLevel);
 		}
 		
-		internal function startPlaying(url:String, 
-									   startedCallback:String = null, 
-									   finishedCallback:String = null,
-									   failedCallback:String = null):void
-		{
-			recorder.stop(true);
-			player.start(url, new WamiListener(startedCallback, finishedCallback, failedCallback));
-		}
-		
-		internal function stopPlaying():void
-		{
+		internal function stopPreview():void {
 			player.stop();
 		}
+
+		internal function startPreview(audioB64:String, startedCallback:String = null, finishedCallback:String = null, failedCallback:String = null):void {
+			  recorder.stop(true);
+        player.start("", new WamiListener(startedCallback, finishedCallback, failedCallback));
+        player.play(Base64.decodeToByteArray(audioB64));
+		}
+
 		
-		internal function getPlayingLevel():int
-		{
+		internal function getPlayingLevel():int {
 			return player.level();
 		}
 		
-		private function startListening(paddingMillis:uint = 200):void
-		{
+		private function startListening(paddingMillis:uint = 200):void {
 			recorder.listen(paddingMillis);
 		}
 		
-		private function stopListening():void
-		{
+		private function stopListening():void {
 			recorder.unlisten();
 		}
 		
-		internal function startRecording(url:String,
-										 startedCallback:String = null, 
-										 finishedCallback:String = null, 
-										 failedCallback:String = null):void
-		{
+		internal function startRecording(url:String, startedCallback:String = null, finishedCallback:String = null, failedCallback:String = null):void {
 			recorder.start(url, new WamiListener(startedCallback, finishedCallback, failedCallback));
 		}
 		
-		internal function stopRecording():void
-		{
+		internal function stopRecording():void {
 			recorder.stop();
 		}
 		
-		internal function getRecordingLevel():int
-		{
+		internal function getRecordingLevel():int {
 			return recorder.level();
+		}
+
+		internal function getRecordingB64():String {
+			return Base64.encodeByteArray(recorder.getRecording());
 		}
 	}
 }
+
 

@@ -58,57 +58,6 @@ package edu.mit.csail.wami.play
 		public function start(url:String, listener:StateListener):void
 		{
 			this.listener = listener;
-			var loader:URLLoader = new URLLoader();
-			loader.dataFormat = URLLoaderDataFormat.BINARY;
-			
-			loader.addEventListener(Event.COMPLETE, completeHandler);
-			loader.addEventListener(Event.OPEN, openHandler);
-			loader.addEventListener(ProgressEvent.PROGRESS, progressHandler);
-			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
-			loader.addEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler);
-			loader.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
-			
-			var request:URLRequest = new URLRequest(url);
-			request.method = URLRequestMethod.GET;
-			
-			try {
-				loader.load(request);
-			} catch (error:Error) {
-				listener.failed(error);
-			}
-			
-			function completeHandler(event:Event):void {
-				listener.started();
-				
-				loader.removeEventListener(Event.COMPLETE, completeHandler);
-				loader.removeEventListener(Event.OPEN, openHandler);
-				loader.removeEventListener(ProgressEvent.PROGRESS, progressHandler);
-				loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
-				loader.removeEventListener(HTTPStatusEvent.HTTP_STATUS, httpStatusHandler);
-				loader.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler)
-				
-				play(loader.data);
-			}
-			
-			function openHandler(event:Event):void {
-				External.debug("openHandler: " + event);
-			}
-			
-			function progressHandler(event:ProgressEvent):void {
-				//External.debug("progressHandler loaded:" + event.bytesLoaded + " total: " + event.bytesTotal);
-			}
-			
-			function securityErrorHandler(event:SecurityErrorEvent):void {
-				listener.failed(new Error("Security error while playing: " + event.errorID));
-			}
-			
-			function httpStatusHandler(event:HTTPStatusEvent):void {
-				External.debug("httpStatusHandler: " + event);
-			}
-			
-			function ioErrorHandler(event:IOErrorEvent):void {
-				listener.failed(new Error("IO error while playing: " + event.errorID));
-			}	
 		}
 		
 		public function stop():void
@@ -133,7 +82,7 @@ package edu.mit.csail.wami.play
 			return 0;
 		}
 		
-		protected function play(audio:ByteArray):void
+		public function play(audio:ByteArray):void
 		{
 			stop();  // Make sure we're stopped
 			
@@ -150,6 +99,7 @@ package edu.mit.csail.wami.play
 			
 			currentAudio = pipe.getByteArray();
 			External.debug("Playing audio with " + currentAudio.length/4 + " samples.");
+			listener.started();
 			
 			var sound:Sound = new Sound();
 			sound.addEventListener(SampleDataEvent.SAMPLE_DATA, handleSampleEvent);

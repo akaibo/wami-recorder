@@ -62,7 +62,7 @@
 					interval = 0;
 					label.text = "";
 					audio.stopRecording();
-					audio.stopPlaying();
+					audio.stopPreview();
 				});
 				
 				var playButton:Button = new Button();
@@ -89,7 +89,7 @@
 						trace(item.name + "\t" + item.time);
 					}
 
-					audio.startPlaying(params.testPlayUrl);
+          //audio.startPlaying(params.testPlayUrl);
 					label.setStyle("color", "#000500");
 					interval = setInterval(function():void
 					{
